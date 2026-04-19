@@ -188,6 +188,7 @@ option(ENABLE_CHANNELTX_REMOTESOURCE "Enable channeltx remotesource plugin" ON)
 option(ENABLE_CHANNELTX_FILESOURCE "Enable channeltx filesource plugin" ON)
 option(ENABLE_CHANNELTX_MODRTTY "Enable channeltx modrtty plugin" ON)
 option(ENABLE_CHANNELTX_MODPSK31 "Enable channeltx modpsk31 plugin" ON)
+option(ENABLE_CHANNELTX_MODCW "Enable channeltx modcw CW/Morse plugin" ON)
 
 # Channel MIMO enablers
 option(ENABLE_CHANNELMIMO "Enable channelmimo plugins" ON)
