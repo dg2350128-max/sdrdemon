@@ -15,6 +15,8 @@ jobs:
   build-windows:
     name: Build modcw DLL (Windows x64)
     runs-on: windows-latest
+    permissions:
+      contents: read
     env:
       QTDIR: "C:/Qt/6.9.3/msvc2022_64"
     steps:
