@@ -1,0 +1,188 @@
+name: CW Modulator Plugin Release
+
+on:
+  push:
+    tags:
+      - 'modcw-v*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Release tag (e.g. modcw-v1.0.0)'
+        required: true
+        default: 'modcw-v1.0.0'
+
+jobs:
+  build-windows:
+    name: Build modcw DLL (Windows x64)
+    runs-on: windows-latest
+    env:
+      QTDIR: "C:/Qt/6.9.3/msvc2022_64"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install basic dependencies
+        run: |
+          choco install ninja cmake --yes
+          ninja --version
+          cmake --version
+
+      - name: Install MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Install Boost
+        env:
+          BOOST_ROOT: ${{ github.workspace }}\downloads\boost
+          BOOST_DEST: C:\Libraries
+          BOOST_URL: https://archives.boost.io/release/1.73.0/source/boost_1_73_0.tar.bz2
+        shell: bash
+        run: |
+          mkdir -p "$BOOST_ROOT"
+          mkdir -p "$BOOST_DEST"
+          curl --progress-bar --location --output "$BOOST_ROOT/download.tar.bz2" "$BOOST_URL"
+          7z -o"$BOOST_ROOT" x "$BOOST_ROOT/download.tar.bz2" -y -bd
+          7z -o"$BOOST_ROOT" x "$BOOST_ROOT/download.tar" -y -bd
+          cd "$BOOST_ROOT" && cp -r boost_* "$BOOST_DEST"
+          rm -rf boost_*/* download.tar.bz2 download.tar
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.9.3'
+          dir: 'C:/'
+          arch: win64_msvc2022_64
+          setup-python: 'false'
+          modules: 'qtcharts qtscxml qt5compat qtlocation qtmultimedia qtpositioning qtserialport qtspeech qtwebsockets qtwebengine qtshadertools qtwebchannel'
+
+      - name: Configure SDRangel (modcw only)
+        shell: cmd
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G Ninja ^
+            -DCMAKE_BUILD_TYPE=Release ^
+            -DENABLE_QT6=ON ^
+            -DARCH_OPT=SSE4_2 ^
+            -DDEBUG_OUTPUT=OFF ^
+            -DENABLE_MIRISDR=OFF ^
+            -DBUILD_SERVER=OFF ^
+            -DCMAKE_PREFIX_PATH="C:\Qt\6.9.3\msvc2022_64;C:\Libraries\boost_1_73_0" ^
+            -DENABLE_CHANNELTX=ON ^
+            -DENABLE_CHANNELTX_MODCW=ON ^
+            -DENABLE_CHANNELTX_MODPSK31=OFF ^
+            -DENABLE_CHANNELTX_MODRTTY=OFF ^
+            -DENABLE_CHANNELTX_MODAIS=OFF ^
+            -DENABLE_CHANNELTX_MODAM=OFF ^
+            -DENABLE_CHANNELTX_MODCHIRPCHAT=OFF ^
+            -DENABLE_CHANNELTX_MODMESHTASTIC=OFF ^
+            -DENABLE_CHANNELTX_MODNFM=OFF ^
+            -DENABLE_CHANNELTX_MODSSB=OFF ^
+            -DENABLE_CHANNELTX_MODWFM=OFF ^
+            -DENABLE_CHANNELTX_MODPACKET=OFF ^
+            -DENABLE_CHANNELTX_MODATV=OFF ^
+            -DENABLE_CHANNELTX_MODDATV=OFF ^
+            -DENABLE_CHANNELTX_MODFREEDV=OFF ^
+            -DENABLE_CHANNELTX_MODM17=OFF ^
+            -DENABLE_CHANNELRX=OFF ^
+            -DENABLE_CHANNELMIMO=OFF ^
+            -DENABLE_SAMPLESOURCE=OFF ^
+            -DENABLE_SAMPLESINK=OFF ^
+            -DENABLE_SAMPLEMIMO=OFF ^
+            -DENABLE_FEATURE=OFF
+
+      - name: Build modcw plugin
+        shell: cmd
+        run: |
+          cd build
+          cmake --build . --config Release --target modcw
+
+      - name: Find and collect artifacts
+        shell: bash
+        run: |
+          mkdir -p release-artifacts
+          find build -name "modcw*.dll" -o -name "modcw*.so" 2>/dev/null | while read f; do
+            cp "$f" release-artifacts/
+          done
+          cp plugins/channeltx/modcw/readme.txt release-artifacts/
+          ls -la release-artifacts/
+
+      - name: Upload DLL artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: modcw-plugin-windows-x64
+          path: release-artifacts/
+
+  create-release:
+    name: Create GitHub Release
+    needs: build-windows
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: modcw-plugin-windows-x64
+          path: release-artifacts/
+
+      - name: Determine tag name
+        id: tag
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tag=${{ github.event.inputs.tag_name }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: "Released 1. Plugin Works to SDRangel"
+          body: |
+            ## CW Modulator Plugin for SDRangel
+
+            This release contains the compiled CW (Morse code) modulator plugin DLL for
+            SDRangel on Windows x64.
+
+            ### Tags
+            `SDRangel` · `Plugin` · `dg2350128-maxsTag`
+
+            ### Contents
+            | File | Description |
+            |------|-------------|
+            | `modcw.dll` | CW Modulator plugin DLL (Windows x64, Release build) |
+            | `readme.txt` | Plugin documentation and usage guide |
+
+            ### Installation
+            Copy `modcw.dll` into the SDRangel `plugins/channeltx/` folder alongside
+            the other channel TX plugins, then restart SDRangel.
+
+            ### Plugin Features
+            - Encodes text as ITU-R M.1677-1 International Morse Code
+            - Configurable speed (1–60 WPM)
+            - Configurable tone frequency (default 700 Hz)
+            - Smooth raised-cosine keying envelope (no key clicks)
+            - Message repeat (finite or infinite loop)
+            - Supports A–Z and 0–9
+
+            ### Build Info
+            - Platform: Windows x64
+            - Qt: 6.9.3 (MSVC 2022)
+            - Build type: Release
+          files: |
+            release-artifacts/modcw.dll
+            release-artifacts/readme.txt
+          draft: false
+          prerelease: false
