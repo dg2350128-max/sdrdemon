@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CWModGUI</class>
+ <widget class="RollupContents" name="CWModGUI">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>390</width>
+    <height>660</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>380</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="font">
+   <font>
+    <family>Liberation Sans</family>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
+  <property name="focusPolicy">
+   <enum>Qt::StrongFocus</enum>
+  </property>
+  <property name="windowTitle">
+   <string>Morse Encoder</string>
+  </property>
+
+  <!-- ============================================================
+       Container 1: RF / Channel settings
+       ============================================================ -->
+  <widget class="QWidget" name="settingsContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>2</x>
+     <y>2</y>
+     <width>385</width>
+     <height>220</height>
+    </rect>
+   </property>
+   <property name="windowTitle">
+    <string>Settings</string>
+   </property>
+   <layout class="QVBoxLayout" name="settingsLayout">
+    <property name="spacing"><number>3</number></property>
+    <property name="leftMargin"><number>2</number></property>
+    <property name="topMargin"><number>2</number></property>
+    <property name="rightMargin"><number>2</number></property>
+    <property name="bottomMargin"><number>2</number></property>
+
+    <!-- Row 1: Frequency + power -->
+    <item>
+     <layout class="QHBoxLayout" name="deltaFreqPowLayout">
+      <item>
+       <layout class="QHBoxLayout" name="deltaFrequencyLayout">
+        <item>
+         <widget class="QLabel" name="deltaFrequencyLabel">
+          <property name="text"><string>&#916;f</string></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="ValueDialZ" name="deltaFrequency">
+          <property name="minimumSize"><size><width>32</width><height>32</height></size></property>
+          <property name="font">
+           <font><family>Liberation Mono</family><pointsize>11</pointsize></font>
+          </property>
+          <property name="toolTip"><string>Frequency shift from device centre</string></property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item><spacer><sizepolicy hsizetype="Expanding" vsizetype="Minimum"/></spacer></item>
+      <item>
+       <widget class="QLabel" name="channelPowerLabel">
+        <property name="text"><string>Pwr</string></property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="channelPower">
+        <property name="minimumSize"><size><width>80</width><height>0</height></size></property>
+        <property name="text"><string>0.0 dB</string></property>
+        <property name="alignment"><set>Qt::AlignRight|Qt::AlignVCenter</set></property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+
+    <!-- Row 2: RF BW -->
+    <item>
+     <layout class="QHBoxLayout">
+      <item><widget class="QLabel"><property name="text"><string>RF BW</string></property></widget></item>
+      <item>
+       <widget class="QSlider" name="rfBW">
+        <property name="minimum"><number>100</number></property>
+        <property name="maximum"><number>5000</number></property>
+        <property name="value"><number>500</number></property>
+        <property name="orientation"><enum>Qt::Horizontal</enum></property>
+        <property name="toolTip"><string>Low-pass filter bandwidth (Hz)</string></property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="rfBWText">
+        <property name="minimumSize"><size><width>60</width><height>0</height></size></property>
+        <property name="text"><string>500 Hz</string></property>
+        <property name="alignment"><set>Qt::AlignRight|Qt::AlignVCenter</set></property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+
+    <!-- Row 3: Gain -->
+    <item>
+     <layout class="QHBoxLayout">
+      <item><widget class="QLabel"><property name="text"><string>Gain</string></property></widget></item>
+      <item>
+       <widget class="QSlider" name="gain">
+        <property name="minimum"><number>-60</number></property>
+        <property name="maximum"><number>0</number></property>
+        <property name="value"><number>0</number></property>
+        <property name="orientation"><enum>Qt::Horizontal</enum></property>
+        <property name="toolTip"><string>Output gain (dB)</string></property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="gainText">
+        <property name="minimumSize"><size><width>60</width><height>0</height></size></property>
+        <property name="text"><string>0 dB</string></property>
+        <property name="alignment"><set>Qt::AlignRight|Qt::AlignVCenter</set></property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+
+    <!-- Row 4: WPM -->
+    <item>
+     <layout class="QHBoxLayout">
+      <item><widget class="QLabel"><property name="text"><string>WPM</string></property></widget></item>
+      <item>
+       <widget class="QSlider" name="wpm">
+        <property name="minimum"><number>5</number></property>
+        <property name="maximum"><number>60</number></property>
+        <property name="value"><number>20</number></property>
+        <property name="orientation"><enum>Qt::Horizontal</enum></property>
+        <property name="toolTip"><string>Morse speed in words per minute (PARIS standard)</string></property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="wpmText">
+        <property name="minimumSize"><size><width>70</width><height>0</height></size></property>
+        <property name="text"><string>20 WPM</string></property>
+        <property name="alignment"><set>Qt::AlignRight|Qt::AlignVCenter</set></property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+
+    <!-- Row 5: Mute / volume meter -->
+    <item>
+     <layout class="QHBoxLayout">
+      <item>
+       <widget class="QToolButton" name="channelMute">
+        <property name="toolTip"><string>Mute channel</string></property>
+        <property name="text"><string>Mute</string></property>
+        <property name="checkable"><bool>true</bool></property>
+       </widget>
+      </item>
+      <item>
+       <widget class="LevelMeterSignalDB" name="volumeMeter">
+        <property name="minimumSize"><size><width>0</width><height>10</height></size></property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+
+  <!-- ============================================================
+       Container 2: Text / transmit
+       ============================================================ -->
+  <widget class="QWidget" name="transmitContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>2</x>
+     <y>226</y>
+     <width>385</width>
+     <height>160</height>
+    </rect>
+   </property>
+   <property name="windowTitle">
+    <string>Text to transmit</string>
+   </property>
+   <layout class="QVBoxLayout" name="transmitLayout">
+    <property name="spacing"><number>3</number></property>
+    <property name="leftMargin"><number>2</number></property>
+    <property name="topMargin"><number>2</number></property>
+    <property name="rightMargin"><number>2</number></property>
+    <property name="bottomMargin"><number>2</number></property>
+
+    <!-- Text input + TX button -->
+    <item>
+     <layout class="QHBoxLayout">
+      <item>
+       <widget class="QLineEdit" name="text">
+        <property name="toolTip"><string>Text to convert to Morse and transmit</string></property>
+        <property name="placeholderText"><string>Enter text and press TX or Enter…</string></property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="txButton">
+        <property name="toolTip"><string>Transmit text as Morse code</string></property>
+        <property name="text"><string>TX</string></property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+
+    <!-- Repeat -->
+    <item>
+     <layout class="QHBoxLayout">
+      <item>
+       <widget class="QToolButton" name="repeat">
+        <property name="toolTip"><string>Repeat transmission</string></property>
+        <property name="text"><string>Repeat</string></property>
+        <property name="checkable"><bool>true</bool></property>
+       </widget>
+      </item>
+      <item><widget class="QLabel"><property name="text"><string>Count</string></property></widget></item>
+      <item>
+       <widget class="QSpinBox" name="repeatCount">
+        <property name="minimum"><number>1</number></property>
+        <property name="maximum"><number>999</number></property>
+        <property name="value"><number>1</number></property>
+        <property name="toolTip"><string>Number of repetitions</string></property>
+       </widget>
+      </item>
+      <item><spacer><sizepolicy hsizetype="Expanding" vsizetype="Minimum"/></spacer></item>
+      <item>
+       <widget class="QPushButton" name="clearTransmittedText">
+        <property name="toolTip"><string>Clear the transmitted text log</string></property>
+        <property name="text"><string>Clear</string></property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+
+    <!-- Transmitted text log -->
+    <item>
+     <widget class="QTextEdit" name="transmittedText">
+      <property name="readOnly"><bool>true</bool></property>
+      <property name="toolTip"><string>Characters transmitted so far</string></property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+
+  <!-- ============================================================
+       Container 3: USB CW Keyer
+       ============================================================ -->
+  <widget class="QWidget" name="keyerContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>2</x>
+     <y>390</y>
+     <width>385</width>
+     <height>80</height>
+    </rect>
+   </property>
+   <property name="windowTitle">
+    <string>USB CW Keyer</string>
+   </property>
+   <layout class="QVBoxLayout" name="keyerLayout">
+    <property name="spacing"><number>3</number></property>
+    <property name="leftMargin"><number>2</number></property>
+    <property name="topMargin"><number>2</number></property>
+    <property name="rightMargin"><number>2</number></property>
+    <property name="bottomMargin"><number>2</number></property>
+
+    <item>
+     <layout class="QHBoxLayout">
+      <item>
+       <widget class="QCheckBox" name="keyerEnabled">
+        <property name="toolTip"><string>Enable USB serial CW keyer. Connect a USB keyer to the selected port. The CTS line (or bytes received) controls the carrier.</string></property>
+        <property name="text"><string>Enable keyer</string></property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+
+    <item>
+     <layout class="QHBoxLayout">
+      <item><widget class="QLabel"><property name="text"><string>Port</string></property></widget></item>
+      <item>
+       <widget class="QComboBox" name="keyerPort">
+        <property name="minimumSize"><size><width>120</width><height>0</height></size></property>
+        <property name="toolTip"><string>Serial port used by the USB CW keyer</string></property>
+        <property name="enabled"><bool>false</bool></property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="refreshPorts">
+        <property name="toolTip"><string>Refresh serial port list</string></property>
+        <property name="text"><string>↺</string></property>
+        <property name="enabled"><bool>false</bool></property>
+        <property name="maximumSize"><size><width>28</width><height>16777215</height></size></property>
+       </widget>
+      </item>
+      <item><spacer><sizepolicy hsizetype="Expanding" vsizetype="Minimum"/></spacer></item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+
+  <!-- ============================================================
+       Container 4: Spectrum
+       ============================================================ -->
+  <widget class="QWidget" name="spectrumContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>2</x>
+     <y>475</y>
+     <width>385</width>
+     <height>180</height>
+    </rect>
+   </property>
+   <property name="windowTitle">
+    <string>Spectrum</string>
+   </property>
+   <layout class="QVBoxLayout" name="spectrumLayout">
+    <property name="spacing"><number>3</number></property>
+    <property name="leftMargin"><number>2</number></property>
+    <property name="topMargin"><number>2</number></property>
+    <property name="rightMargin"><number>2</number></property>
+    <property name="bottomMargin"><number>2</number></property>
+    <item>
+     <widget class="GLSpectrum" name="glSpectrum">
+      <property name="minimumSize"><size><width>0</width><height>100</height></size></property>
+     </widget>
+    </item>
+    <item>
+     <widget class="GLSpectrumGUI" name="spectrumGUI"/>
+    </item>
+   </layout>
+  </widget>
+
+ </widget>
+
+ <customwidgets>
+  <customwidget>
+   <class>RollupContents</class>
+   <extends>QWidget</extends>
+   <header>gui/rollupcontents.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ValueDialZ</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedialz.h</header>
+  </customwidget>
+  <customwidget>
+   <class>GLSpectrum</class>
+   <extends>QWidget</extends>
+   <header>gui/glspectrum.h</header>
+  </customwidget>
+  <customwidget>
+   <class>GLSpectrumGUI</class>
+   <extends>QWidget</extends>
+   <header>gui/glspectrumgui.h</header>
+  </customwidget>
+  <customwidget>
+   <class>LevelMeterSignalDB</class>
+   <extends>QWidget</extends>
+   <header>gui/levelmeter.h</header>
+  </customwidget>
+ </customwidgets>
+
+ <resources/>
+ <connections/>
+</ui>
