@@ -1,0 +1,5 @@
+# Ignore all CMake build artifacts but keep the generated EXE installer
+*
+!.gitignore
+!.gitkeep
+!*.exe
