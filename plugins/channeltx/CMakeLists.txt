@@ -4,6 +4,10 @@ if (ENABLE_CHANNELTX_MODPSK31)
     add_subdirectory(modpsk31)
 endif()
 
+if (ENABLE_CHANNELTX_MODCW)
+    add_subdirectory(modcw)
+endif()
+
 if (ENABLE_CHANNELTX_MODRTTY)
     add_subdirectory(modrtty)
 endif()
