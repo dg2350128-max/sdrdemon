@@ -1,0 +1,118 @@
+name: SDRangel Windows plugin DLL ZIP
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - windows_plugin_release
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    name: Windows-x64 plugin ZIP
+    runs-on: windows-latest
+    permissions:
+      contents: write   # required to upload release assets
+      actions: read
+    env:
+      QT_INST_DIR: "C:/"
+      QTDIR: "C:/Qt/6.9.3/msvc2022_64"
+      QT_ARCH: win64_msvc2022_64
+      BOOST_DL: "${{ github.workspace }}\\downloads\\boost"
+      LIB_DIR: "C:\\Libraries"
+      STAGING_DIR: "${{ github.workspace }}\\staging"
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install build tools
+        run: choco install ninja cmake --no-progress
+
+      - name: Set up MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Install Boost
+        shell: bash
+        env:
+          BOOST_URL: https://archives.boost.io/release/1.73.0/source/boost_1_73_0.tar.bz2
+        run: |
+          mkdir -p "$BOOST_DL"
+          mkdir -p "$LIB_DIR"
+          curl --progress-bar --location --output "$BOOST_DL/download.tar.bz2" "$BOOST_URL"
+          7z -o"$BOOST_DL" x "$BOOST_DL/download.tar.bz2" -y -bd
+          7z -o"$BOOST_DL" x "$BOOST_DL/download.tar" -y -bd
+          cd "$BOOST_DL" && cp -r boost_* "$LIB_DIR"
+          rm -rf boost_*/* download.tar.bz2 download.tar
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.9.3'
+          dir: ${{ env.QT_INST_DIR }}
+          arch: ${{ env.QT_ARCH }}
+          setup-python: 'false'
+          modules: 'qtcharts qtscxml qt5compat qtlocation qtmultimedia qtpositioning qtserialport qtspeech qtwebsockets qtwebengine qtshadertools qtwebchannel'
+
+      - name: Configure
+        shell: cmd
+        run: |
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          mkdir build
+          cd build
+          cmake .. -G Ninja ^
+            -DCMAKE_BUILD_TYPE=Release ^
+            -DENABLE_QT6=ON ^
+            -DARCH_OPT=SSE4_2 ^
+            -DDEBUG_OUTPUT=ON ^
+            -DENABLE_MIRISDR=OFF ^
+            -DBUILD_SERVER=OFF ^
+            -DCMAKE_INSTALL_PREFIX="${{ env.STAGING_DIR }}" ^
+            -DCMAKE_PREFIX_PATH="C:\Qt\6.9.3\msvc2022_64;C:\Libraries\boost_1_73_0"
+
+      - name: Build plugins
+        shell: cmd
+        run: |
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          cd build
+          cmake --build . --config Release
+
+      - name: Install to staging
+        shell: cmd
+        run: |
+          cd build
+          cmake --install . --config Release
+
+      - name: Get version
+        id: get_version
+        shell: bash
+        run: echo "version=$(grep sdrangel_VERSION build/CMakeCache.txt | cut -d '=' -f2)" >> "$GITHUB_OUTPUT"
+
+      - name: Package plugins as ZIP
+        shell: pwsh
+        run: |
+          $pluginsPath = Join-Path "${{ env.STAGING_DIR }}" "plugins"
+          $zipName = "sdrangel-plugins-${{ steps.get_version.outputs.version }}-win64.zip"
+          Compress-Archive -Path $pluginsPath -DestinationPath "${{ github.workspace }}\$zipName"
+          Write-Host "Created $zipName"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdrangel-plugins-${{ steps.get_version.outputs.version }}-win64.zip
+          path: ${{ github.workspace }}/sdrangel-plugins-${{ steps.get_version.outputs.version }}-win64.zip
+
+      - name: Upload release asset
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ github.workspace }}/sdrangel-plugins-${{ steps.get_version.outputs.version }}-win64.zip
