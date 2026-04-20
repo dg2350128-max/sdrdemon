@@ -1,4 +1,4 @@
-# Large EXE Builder
+# Large Exe Builder
 
 Produces a Windows 64-bit console EXE that is at least **120 MB** in size by
 embedding a 130 MiB random-data blob into the binary via `objcopy`.

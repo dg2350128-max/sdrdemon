@@ -57,7 +57,7 @@ EXE="${OUT_DIR}/sdrangel_large.exe"
 echo "[4/4] Linking → ${EXE}"
 "${CC}" -o "${EXE}" "${MAIN_OBJ}" "${DATA_OBJ}"
 
-SIZE_BYTES=$(stat -c%s "${EXE}")
+SIZE_BYTES=$(wc -c < "${EXE}" | tr -d ' ')
 SIZE_MB=$(awk "BEGIN { printf \"%.2f\", ${SIZE_BYTES}/1048576 }")
 echo "Done. ${EXE} — ${SIZE_BYTES} bytes (${SIZE_MB} MiB)"
 
