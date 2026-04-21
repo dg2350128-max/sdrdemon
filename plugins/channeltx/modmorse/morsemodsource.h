@@ -15,8 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_MORSEMSOURCE_H
-#define INCLUDE_MORSEMSOURCE_H
+#ifndef INCLUDE_MORSEMODSOURCE_H
+#define INCLUDE_MORSEMODSOURCE_H
 
 #include <QMutex>
 #include <QDebug>
@@ -131,4 +131,4 @@ private:
     static const QMap<QChar, QVector<int>>& morseTable();
 };
 
-#endif // INCLUDE_MORSEMSOURCE_H
+#endif // INCLUDE_MORSEMODSOURCE_H
