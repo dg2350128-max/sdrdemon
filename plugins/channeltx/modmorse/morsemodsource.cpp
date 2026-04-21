@@ -274,7 +274,7 @@ void MorseModSource::calculateLevel(Real& sample)
 {
     if (m_levelCalcCount < (quint32)m_levelNbSamples)
     {
-        m_peakLevel = std::max(std::fabs(m_peakLevel), sample);
+        m_peakLevel = std::max(m_peakLevel, std::fabs(sample));
         m_levelSum += sample * sample;
         m_levelCalcCount++;
     }
